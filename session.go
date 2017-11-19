@@ -28,6 +28,9 @@ type Session struct {
 // on a websocket that is already open
 var ErrAlreadyOpen = errors.New("web socket is already open")
 
+// ErrReadOnly is thrown when attempting to send messages using a read-only session
+var ErrReadOnly = errors.New("session is read-only")
+
 var wsURL = url.URL{Scheme: "wss", Host: "www.destiny.gg", Path: "/ws"}
 
 // Open opens a websocket connection to destinygg chat
@@ -97,25 +100,47 @@ func (s *Session) listen(ws *websocket.Conn, listening <-chan bool) {
 
 		switch mType {
 		case "MSG":
+			if s.handlers.msgHandler == nil {
+				continue
+			}
+
 			m, err := parseMessage(mContent)
 			if err != nil {
 				continue
 			}
 
-			if s.handlers.msgHandler != nil {
-				s.handlers.msgHandler(m)
-			}
+			s.handlers.msgHandler(m)
 		case "MUTE":
 		case "UNMUTE":
 		case "BAN":
 		case "UNBAN":
 		case "SUBONLY":
-		// case "PING":
-		// case "PONG":
 		case "BROADCAST":
 		case "PRIVMSG":
+			if s.handlers.pmHandler == nil {
+				continue
+			}
+
+			pm, err := parsePrivateMessage(mContent)
+			if err != nil {
+				continue
+			}
+
+			u, found := s.GetUser(pm.User.Nick)
+			if found {
+				pm.User = u
+			}
+
+			s.handlers.pmHandler(pm)
+		case "PRIVMSGSENT":
+		case "PING":
+		case "PONG":
 		case "ERR":
-			errMessage := strings.Replace(mContent, `"`, "", -1)
+			if s.handlers.errHandler == nil {
+				continue
+			}
+
+			errMessage := parseErrorMessage(mContent)
 			s.handlers.errHandler(errMessage)
 		case "NAMES":
 			n, err := parseNames(mContent)
@@ -131,19 +156,22 @@ func (s *Session) listen(ws *websocket.Conn, listening <-chan bool) {
 				continue
 			}
 
-			user := User{
-				Nick:     ra.Nick,
-				Features: ra.Features,
-			}
+			s.state.addUser(ra.User)
 
-			s.state.addUser(user)
+			if s.handlers.joinHandler != nil {
+				s.handlers.joinHandler(ra)
+			}
 		case "QUIT":
 			ra, err := parseRoomAction(mContent)
 			if err != nil {
 				continue
 			}
 
-			s.state.removeUser(ra.Nick)
+			s.state.removeUser(ra.User.Nick)
+
+			if s.handlers.quitHandler != nil {
+				s.handlers.quitHandler(ra)
+			}
 		}
 
 		select {
@@ -186,4 +214,37 @@ func (s *Session) GetUser(name string) (User, bool) {
 	}
 
 	return User{}, false
+}
+
+// SendMessage sends the given string as a message to chat
+// Note: a return error of nil does not guarantee successful delivery
+// Monitor for error events to ensure the message was sent with no errors
+func (s *Session) SendMessage(message string) error {
+	if s.readOnly {
+		return ErrReadOnly
+	}
+	m := fmt.Sprintf(`MSG {"data":"%s"}`, message)
+	err := s.ws.WriteMessage(websocket.TextMessage, []byte(m))
+	return err
+}
+
+// SendAction calls the SendMessage method but also adds
+// "/me" in front of the message to make it a chat action
+// same caveat with the returned error value applies
+func (s *Session) SendAction(message string) error {
+	err := s.SendMessage(fmt.Sprintf("/me %s", message))
+	return err
+}
+
+// SendPrivateMessage sends the given user a private message
+// Note: a return error of nil does not guarantee successful delivery
+// Monitor for error events to ensure the message was sent with no errors
+func (s *Session) SendPrivateMessage(nick string, message string) error {
+	if s.readOnly {
+		return ErrReadOnly
+	}
+
+	m := fmt.Sprintf(`PRIVMSG {"data":"%s", "nick":"%s"}`, message, nick)
+	err := s.ws.WriteMessage(websocket.TextMessage, []byte(m))
+	return err
 }

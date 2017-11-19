@@ -1,6 +1,7 @@
 package dggchat
 
 import (
+	"strings"
 	"time"
 )
 
@@ -45,10 +46,9 @@ const (
 type (
 	// Message reprents a normal dgg chat message
 	Message struct {
-		Sender    string
+		Sender    User
 		Timestamp time.Time
 		Message   string
-		Features  Features
 	}
 
 	message struct {
@@ -69,23 +69,46 @@ type (
 		Features []string `json:"features"`
 	}
 
+	// RoomAction represents a user joining or quitting the chat
+	RoomAction struct {
+		User      User
+		Timestamp time.Time
+	}
+
 	roomAction struct {
 		Nick      string   `json:"nick"`
 		Features  []string `json:"features"`
 		Timestamp int64    `json:"timestamp"`
 	}
 
-	// Features contains a list of different user features
-	Features []string
+	// PrivateMessage represents a received private message from a user
+	PrivateMessage struct {
+		User      User
+		Message   string
+		Timestamp time.Time
+		ID        int
+	}
+
+	privateMessage struct {
+		MessageID int    `json:"messageid"`
+		Timestamp int64  `json:"timestamp"`
+		Nick      string `json:"nick"`
+		Data      string `json:"data"`
+	}
 )
 
-// HasFeature returns true if a feature is in the features list
-func (f Features) HasFeature(s string) bool {
-	for _, feature := range f {
+// HasFeature returns true if user has given feature
+func (u *User) HasFeature(s string) bool {
+	for _, feature := range u.Features {
 		if feature == s {
 			return true
 		}
 	}
 
 	return false
+}
+
+// IsAction returns true if the message was an action (/me)
+func (m *Message) IsAction() bool {
+	return strings.HasPrefix(m.Message, "/me ")
 }

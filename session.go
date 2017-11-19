@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -13,6 +14,7 @@ import (
 
 // A Session represents a connection to destinygg chat
 type Session struct {
+	sync.RWMutex
 	// If true, attempt to reconnect on error
 	AttempToReconnect bool
 
@@ -35,6 +37,9 @@ var wsURL = url.URL{Scheme: "wss", Host: "www.destiny.gg", Path: "/ws"}
 
 // Open opens a websocket connection to destinygg chat
 func (s *Session) Open() error {
+	s.Lock()
+	defer s.Unlock()
+
 	if s.ws != nil {
 		return ErrAlreadyOpen
 	}
@@ -109,7 +114,7 @@ func (s *Session) listen(ws *websocket.Conn, listening <-chan bool) {
 				continue
 			}
 
-			s.handlers.msgHandler(m)
+			s.handlers.msgHandler(m, s)
 		case "MUTE":
 		case "UNMUTE":
 		case "BAN":
@@ -125,7 +130,7 @@ func (s *Session) listen(ws *websocket.Conn, listening <-chan bool) {
 				continue
 			}
 
-			s.handlers.broadcastHandler(b)
+			s.handlers.broadcastHandler(b, s)
 		case "PRIVMSG":
 			if s.handlers.pmHandler == nil {
 				continue
@@ -141,7 +146,7 @@ func (s *Session) listen(ws *websocket.Conn, listening <-chan bool) {
 				pm.User = u
 			}
 
-			s.handlers.pmHandler(pm)
+			s.handlers.pmHandler(pm, s)
 		case "PRIVMSGSENT":
 		case "PING":
 		case "PONG":
@@ -151,7 +156,7 @@ func (s *Session) listen(ws *websocket.Conn, listening <-chan bool) {
 			}
 
 			errMessage := parseErrorMessage(mContent)
-			s.handlers.errHandler(errMessage)
+			s.handlers.errHandler(errMessage, s)
 		case "NAMES":
 			n, err := parseNames(mContent)
 			if err != nil {
@@ -169,7 +174,7 @@ func (s *Session) listen(ws *websocket.Conn, listening <-chan bool) {
 			s.state.addUser(ra.User)
 
 			if s.handlers.joinHandler != nil {
-				s.handlers.joinHandler(ra)
+				s.handlers.joinHandler(ra, s)
 			}
 		case "QUIT":
 			ra, err := parseRoomAction(mContent)
@@ -180,7 +185,7 @@ func (s *Session) listen(ws *websocket.Conn, listening <-chan bool) {
 			s.state.removeUser(ra.User.Nick)
 
 			if s.handlers.quitHandler != nil {
-				s.handlers.quitHandler(ra)
+				s.handlers.quitHandler(ra, s)
 			}
 		}
 
@@ -217,6 +222,9 @@ func (s *Session) reconnect() {
 // If the user is found, returns the user and true
 // otherwise false is returned as the second parameter
 func (s *Session) GetUser(name string) (User, bool) {
+	s.RLock()
+	defer s.RUnlock()
+
 	for _, user := range s.state.users {
 		if strings.EqualFold(name, user.Nick) {
 			return user, true

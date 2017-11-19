@@ -3,8 +3,6 @@ package dggchat
 
 import "errors"
 
-const version = "0.1.0"
-
 // ErrTooManyArgs is thrown when a funcion is called with an unexpeted number of arguments
 var ErrTooManyArgs = errors.New("function called with unexcepted amount of arguments")
 
@@ -16,7 +14,8 @@ func New(args ...string) (*Session, error) {
 	}
 
 	s := &Session{
-		AttempToReconnect: true
+		AttempToReconnect: true,
+		state:             newState(),
 	}
 	if len(args) == 1 {
 		s.loginKey = args[0]

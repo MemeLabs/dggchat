@@ -81,6 +81,22 @@ func parsePrivateMessage(s string) (PrivateMessage, error) {
 	return privateMessage, nil
 }
 
+func parseBroadcast(s string) (Broadcast, error) {
+	var b broadcast
+
+	err := json.Unmarshal([]byte(s), &b)
+	if err != nil {
+		return Broadcast{}, err
+	}
+
+	broadcast := Broadcast{
+		Message:   b.Data,
+		Timestamp: unixToTime(b.Timestamp),
+	}
+
+	return broadcast, nil
+}
+
 func unixToTime(stamp int64) time.Time {
 	return time.Unix(stamp/1000, 0)
 }

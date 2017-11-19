@@ -116,6 +116,16 @@ func (s *Session) listen(ws *websocket.Conn, listening <-chan bool) {
 		case "UNBAN":
 		case "SUBONLY":
 		case "BROADCAST":
+			if s.handlers.broadcastHandler == nil {
+				continue
+			}
+
+			b, err := parseBroadcast(mContent)
+			if err != nil {
+				continue
+			}
+
+			s.handlers.broadcastHandler(b)
 		case "PRIVMSG":
 			if s.handlers.pmHandler == nil {
 				continue
@@ -203,8 +213,8 @@ func (s *Session) reconnect() {
 	}
 }
 
-// GetUser attempts to find the user in the chat room state
-// if the user is found, returns the user and true
+// GetUser attempts to find the user in the chat room state.
+// If the user is found, returns the user and true
 // otherwise false is returned as the second parameter
 func (s *Session) GetUser(name string) (User, bool) {
 	for _, user := range s.state.users {
@@ -216,8 +226,8 @@ func (s *Session) GetUser(name string) (User, bool) {
 	return User{}, false
 }
 
-// SendMessage sends the given string as a message to chat
-// Note: a return error of nil does not guarantee successful delivery
+// SendMessage sends the given string as a message to chat.
+// Note: a return error of nil does not guarantee successful delivery.
 // Monitor for error events to ensure the message was sent with no errors
 func (s *Session) SendMessage(message string) error {
 	if s.readOnly {
@@ -236,8 +246,8 @@ func (s *Session) SendAction(message string) error {
 	return err
 }
 
-// SendPrivateMessage sends the given user a private message
-// Note: a return error of nil does not guarantee successful delivery
+// SendPrivateMessage sends the given user a private message.
+// Note: a return error of nil does not guarantee successful delivery.
 // Monitor for error events to ensure the message was sent with no errors
 func (s *Session) SendPrivateMessage(nick string, message string) error {
 	if s.readOnly {

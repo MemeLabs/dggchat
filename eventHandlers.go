@@ -1,11 +1,12 @@
 package dggchat
 
 type handlers struct {
-	msgHandler  func(Message)
-	errHandler  func(string)
-	joinHandler func(RoomAction)
-	quitHandler func(RoomAction)
-	pmHandler   func(PrivateMessage)
+	msgHandler       func(Message)
+	errHandler       func(string)
+	joinHandler      func(RoomAction)
+	quitHandler      func(RoomAction)
+	pmHandler        func(PrivateMessage)
+	broadcastHandler func(Broadcast)
 }
 
 // AddMessageHandler adds a function that will be called every time a message is received
@@ -31,4 +32,9 @@ func (s *Session) AddQuitHandler(fn func(RoomAction)) {
 // AddPMHandler adds a function that will be called every time a private message is received
 func (s *Session) AddPMHandler(fn func(PrivateMessage)) {
 	s.handlers.pmHandler = fn
+}
+
+// AddBroadcastHandler adds a function that will be called every time a broadcast is sent to the chat
+func (s *Session) AddBroadcastHandler(fn func(Broadcast)) {
+	s.handlers.broadcastHandler = fn
 }

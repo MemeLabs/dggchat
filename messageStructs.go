@@ -95,6 +95,17 @@ type (
 		Nick      string `json:"nick"`
 		Data      string `json:"data"`
 	}
+
+	// Broadcast represents a chat broadcast
+	Broadcast struct {
+		Message   string
+		Timestamp time.Time
+	}
+
+	broadcast struct {
+		Data      string `json:"data"`
+		Timestamp int64  `json:"timestamp"`
+	}
 )
 
 // HasFeature returns true if user has given feature

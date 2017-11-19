@@ -7,11 +7,11 @@ import (
 // Constants for different types of features a user can have
 const (
 	FeatureSubscriber    = "subscriber"
-	FeatureBot           = "BOT"
-	FeatureProtected     = "PROTECTED"
-	FeatureVIP           = "VIP"
-	FeatureModerator     = "MODERATOR"
-	FeatureAdministrator = "ADMINISTRATOR"
+	FeatureBot           = "bot"
+	FeatureProtected     = "protected"
+	FeatureVIP           = "vip"
+	FeatureModerator     = "moderator"
+	FeatureAdministrator = "admin"
 	FeatureTier2         = "flair1"
 	FeatureNotable       = "flair2"
 	FeatureTier3         = "flair3"

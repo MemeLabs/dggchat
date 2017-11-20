@@ -54,3 +54,5 @@ func onError(e string, s *dggchat.Session) {
 	log.Printf("error %s\n", e)
 }
 ```
+
+For a more complex example, see [FerretBot](https://github.com/voloshink/FerretBot)

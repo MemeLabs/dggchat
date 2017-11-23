@@ -7,6 +7,7 @@ type handlers struct {
 	quitHandler      func(RoomAction, *Session)
 	pmHandler        func(PrivateMessage, *Session)
 	broadcastHandler func(Broadcast, *Session)
+	pingHandler      func(Ping, *Session)
 }
 
 // AddMessageHandler adds a function that will be called every time a message is received
@@ -37,4 +38,9 @@ func (s *Session) AddPMHandler(fn func(PrivateMessage, *Session)) {
 // AddBroadcastHandler adds a function that will be called every time a broadcast is sent to the chat
 func (s *Session) AddBroadcastHandler(fn func(Broadcast, *Session)) {
 	s.handlers.broadcastHandler = fn
+}
+
+// AddPingHandler adds a function that will be called when a server responds with a pong
+func (s *Session) AddPingHandler(fn func(Ping, *Session)) {
+	s.handlers.pingHandler = fn
 }

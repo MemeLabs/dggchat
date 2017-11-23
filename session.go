@@ -150,10 +150,16 @@ func (s *Session) listen(ws *websocket.Conn, listening <-chan bool) {
 		case "PRIVMSGSENT":
 		case "PING":
 		case "PONG":
-			// p, err := parsePing(mContent)
-			// if err != nil {
-			// continue
-			// }
+			if s.handlers.pingHandler == nil {
+				continue
+			}
+
+			p, err := parsePing(mContent)
+			if err != nil {
+				continue
+			}
+
+			s.handlers.pingHandler(p, s)
 		case "ERR":
 			if s.handlers.errHandler == nil {
 				continue

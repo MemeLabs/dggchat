@@ -107,7 +107,8 @@ type (
 		Timestamp int64  `json:"timestamp"`
 	}
 
-	ping struct {
+	// Ping represents a pong response from the server
+	Ping struct {
 		Timestamp int64 `json:"timestamp"`
 	}
 )

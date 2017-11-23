@@ -98,19 +98,19 @@ func parseBroadcast(s string) (Broadcast, error) {
 	return broadcast, nil
 }
 
-func parsePing(s string) (ping, error) {
-	var p ping
+func parsePing(s string) (Ping, error) {
+	var p Ping
 
 	s = strings.Replace(s, `"`, "", -1)
 
 	decoded, err := base64.StdEncoding.DecodeString(s)
 	if err != nil {
-		return ping{}, err
+		return Ping{}, err
 	}
 
 	err = json.Unmarshal(decoded, &p)
 	if err != nil {
-		return ping{}, err
+		return Ping{}, err
 	}
 
 	return p, nil

@@ -150,6 +150,10 @@ func (s *Session) listen(ws *websocket.Conn, listening <-chan bool) {
 		case "PRIVMSGSENT":
 		case "PING":
 		case "PONG":
+			// p, err := parsePing(mContent)
+			// if err != nil {
+			// continue
+			// }
 		case "ERR":
 			if s.handlers.errHandler == nil {
 				continue
@@ -263,6 +267,13 @@ func (s *Session) SendPrivateMessage(nick string, message string) error {
 	}
 
 	m := fmt.Sprintf(`PRIVMSG {"data":"%s", "nick":"%s"}`, message, nick)
+	err := s.ws.WriteMessage(websocket.TextMessage, []byte(m))
+	return err
+}
+
+// SendPing sends a ping to the server with the current timestamp
+func (s *Session) SendPing() error {
+	m := fmt.Sprintf(`PING {"timestamp": %d}`, timeToUnix(time.Now()))
 	err := s.ws.WriteMessage(websocket.TextMessage, []byte(m))
 	return err
 }

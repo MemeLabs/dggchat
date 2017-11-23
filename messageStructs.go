@@ -106,6 +106,10 @@ type (
 		Data      string `json:"data"`
 		Timestamp int64  `json:"timestamp"`
 	}
+
+	ping struct {
+		Timestamp int64 `json:"timestamp"`
+	}
 )
 
 // HasFeature returns true if user has given feature

@@ -1,6 +1,7 @@
 package dggchat
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"strings"
 	"time"
@@ -97,6 +98,28 @@ func parseBroadcast(s string) (Broadcast, error) {
 	return broadcast, nil
 }
 
+func parsePing(s string) (ping, error) {
+	var p ping
+
+	s = strings.Replace(s, `"`, "", -1)
+
+	decoded, err := base64.StdEncoding.DecodeString(s)
+	if err != nil {
+		return ping{}, err
+	}
+
+	err = json.Unmarshal(decoded, &p)
+	if err != nil {
+		return ping{}, err
+	}
+
+	return p, nil
+}
+
 func unixToTime(stamp int64) time.Time {
 	return time.Unix(stamp/1000, 0)
+}
+
+func timeToUnix(t time.Time) int64 {
+	return t.Unix() * 1000
 }

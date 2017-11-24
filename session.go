@@ -36,8 +36,8 @@ var ErrReadOnly = errors.New("session is read-only")
 
 var wsURL = url.URL{Scheme: "wss", Host: "www.destiny.gg", Path: "/ws"}
 
-// SetURL changes the url being used when connecting to the socket server.
-// This should be done before calling .Open()
+// SetURL changes the url that will be used when connecting to the socket server.
+// This should be done before calling *session.Open()
 func (s *Session) SetURL(u url.URL) {
 	s.wsURL = u
 }

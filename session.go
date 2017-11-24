@@ -21,6 +21,7 @@ type Session struct {
 	readOnly  bool
 	loginKey  string
 	listening chan bool
+	wsURL     url.URL
 	ws        *websocket.Conn
 	handlers  handlers
 	state     *state
@@ -34,6 +35,12 @@ var ErrAlreadyOpen = errors.New("web socket is already open")
 var ErrReadOnly = errors.New("session is read-only")
 
 var wsURL = url.URL{Scheme: "wss", Host: "www.destiny.gg", Path: "/ws"}
+
+// SetURL changes the url being used when connecting to the socket server.
+// This should be done before calling .Open()
+func (s *Session) SetURL(u url.URL) {
+	s.wsURL = u
+}
 
 // Open opens a websocket connection to destinygg chat
 func (s *Session) Open() error {
@@ -50,7 +57,7 @@ func (s *Session) Open() error {
 		header.Add("Cookie", fmt.Sprintf("authtoken=%s", s.loginKey))
 	}
 
-	ws, _, err := websocket.DefaultDialer.Dial(wsURL.String(), header)
+	ws, _, err := websocket.DefaultDialer.Dial(s.wsURL.String(), header)
 	if err != nil {
 		return err
 	}

@@ -16,6 +16,7 @@ func New(args ...string) (*Session, error) {
 	s := &Session{
 		AttempToReconnect: true,
 		state:             newState(),
+		wsURL:             wsURL,
 	}
 	if len(args) == 1 {
 		s.loginKey = args[0]

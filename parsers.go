@@ -107,7 +107,7 @@ func parseErrorMessage(s string) string {
 	return strings.Replace(s, `"`, "", -1)
 }
 
-func parsePrivateMessage(s string) (PrivateMessage, error) {
+func parsePrivateMessage(s string, sess *Session) (PrivateMessage, error) {
 	var pm privateMessage
 
 	err := json.Unmarshal([]byte(s), &pm)
@@ -123,6 +123,11 @@ func parsePrivateMessage(s string) (PrivateMessage, error) {
 		ID:        pm.MessageID,
 		Message:   pm.Data,
 		Timestamp: unixToTime(pm.Timestamp),
+	}
+
+	u, found := sess.GetUser(privateMessage.User.Nick)
+	if found {
+		privateMessage.User = u
 	}
 
 	return privateMessage, nil
@@ -142,6 +147,27 @@ func parseBroadcast(s string) (Broadcast, error) {
 	}
 
 	return broadcast, nil
+}
+
+func parseSubOnly(s string) (SubOnly, error) {
+	var so subOnly
+
+	err := json.Unmarshal([]byte(s), &so)
+	if err != nil {
+		return SubOnly{}, err
+	}
+
+	subonly := SubOnly{
+		Sender: User{
+			Nick:     so.Nick,
+			Features: so.Features,
+		},
+		Timestamp: unixToTime(so.Timestamp),
+		// the backend specifies values "on" and "off" ONLY.
+		Active: so.Data == "on",
+	}
+
+	return subonly, nil
 }
 
 func parsePing(s string) (Ping, error) {

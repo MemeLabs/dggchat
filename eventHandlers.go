@@ -12,6 +12,7 @@ type handlers struct {
 	pmHandler        func(PrivateMessage, *Session)
 	broadcastHandler func(Broadcast, *Session)
 	pingHandler      func(Ping, *Session)
+	subOnlyHandler   func(SubOnly, *Session)
 }
 
 // AddMessageHandler adds a function that will be called every time a message is received
@@ -67,4 +68,9 @@ func (s *Session) AddBroadcastHandler(fn func(Broadcast, *Session)) {
 // AddPingHandler adds a function that will be called when a server responds with a pong
 func (s *Session) AddPingHandler(fn func(Ping, *Session)) {
 	s.handlers.pingHandler = fn
+}
+
+// AddSubOnlyHandler adds a function that will will be called every time a subonly message is received
+func (s *Session) AddSubOnlyHandler(fn func(SubOnly, *Session)) {
+	s.handlers.subOnlyHandler = fn
 }

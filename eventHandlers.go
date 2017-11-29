@@ -27,7 +27,7 @@ func (s *Session) AddMuteHandler(fn func(Mute, *Session)) {
 
 // AddUnmuteHandler adds a function that will be called every time an unmute message is received
 func (s *Session) AddUnmuteHandler(fn func(Mute, *Session)) {
-	s.handlers.muteHandler = fn
+	s.handlers.unmuteHandler = fn
 }
 
 // AddBanHandler adds a function that will be called every time a ban message is received

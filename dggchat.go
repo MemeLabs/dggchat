@@ -1,7 +1,11 @@
 // Package dggchat provides destiny gg chat binding for Go
 package dggchat
 
-import "errors"
+import (
+	"errors"
+
+	"github.com/gorilla/websocket"
+)
 
 // ErrTooManyArgs is thrown when a funcion is called with an unexpeted number of arguments
 var ErrTooManyArgs = errors.New("function called with unexcepted amount of arguments")
@@ -17,6 +21,7 @@ func New(args ...string) (*Session, error) {
 		AttempToReconnect: true,
 		state:             newState(),
 		wsURL:             wsURL,
+		dialer:            websocket.DefaultDialer,
 	}
 	if len(args) == 1 {
 		s.loginKey = args[0]

@@ -2,6 +2,10 @@ package dggchat
 
 type handlers struct {
 	msgHandler       func(Message, *Session)
+	muteHandler      func(Mute, *Session)
+	unmuteHandler    func(Mute, *Session)
+	banHandler       func(Ban, *Session)
+	unbanHandler     func(Ban, *Session)
 	errHandler       func(string, *Session)
 	joinHandler      func(RoomAction, *Session)
 	quitHandler      func(RoomAction, *Session)
@@ -13,6 +17,26 @@ type handlers struct {
 // AddMessageHandler adds a function that will be called every time a message is received
 func (s *Session) AddMessageHandler(fn func(Message, *Session)) {
 	s.handlers.msgHandler = fn
+}
+
+// AddMuteHandler adds a function that will be called every time a mute message is received
+func (s *Session) AddMuteHandler(fn func(Mute, *Session)) {
+	s.handlers.muteHandler = fn
+}
+
+// AddUnmuteHandler adds a function that will be called every time a mute message is received
+func (s *Session) AddUnmuteHandler(fn func(Mute, *Session)) {
+	s.handlers.muteHandler = fn
+}
+
+// AddBanHandler adds a function that will be called every time a mute message is received
+func (s *Session) AddBanHandler(fn func(Ban, *Session)) {
+	s.handlers.banHandler = fn
+}
+
+// AddUnbanHandler adds a function that will be called every time a mute message is received
+func (s *Session) AddUnbanHandler(fn func(Ban, *Session)) {
+	s.handlers.banHandler = fn
 }
 
 // AddErrorHandler adds a function that will be called every time an error message is received

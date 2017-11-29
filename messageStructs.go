@@ -58,6 +58,24 @@ type (
 		Data      string   `json:"data"`
 	}
 
+	// Mute represents (un)mutes issued by chat moderators
+	Mute struct {
+		Sender    User
+		Timestamp time.Time
+		Target    User
+		// Online indicates whether the target was online when targeted
+		Online bool
+	}
+
+	// Ban represents (un)bans issued by chat moderators
+	Ban struct {
+		Sender    User
+		Timestamp time.Time
+		Target    User
+		// Online indicates whether the target was online when targeted
+		Online bool
+	}
+
 	namesMessage struct {
 		Connections int    `json:"connectioncount"`
 		Users       []User `json:"users"`

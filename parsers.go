@@ -28,6 +28,52 @@ func parseMessage(s string) (Message, error) {
 	return message, nil
 }
 
+func parseMute(s string, sess *Session) (Mute, error) {
+	m, err := parseMessage(s)
+	if err != nil {
+		return Mute{}, err
+	}
+
+	// Try to get features of target, if they are currently online
+	targetNick := m.Message
+	u, online := sess.GetUser(targetNick)
+
+	mute := Mute{
+		Sender:    m.Sender,
+		Timestamp: m.Timestamp,
+		Target: User{
+			Nick:     targetNick,
+			Features: u.Features,
+		},
+		Online: online,
+	}
+
+	return mute, nil
+}
+
+func parseBan(s string, sess *Session) (Ban, error) {
+	m, err := parseMessage(s)
+	if err != nil {
+		return Ban{}, err
+	}
+
+	// Try to get features of target, if they are currently online
+	targetNick := m.Message
+	u, online := sess.GetUser(targetNick)
+
+	ban := Ban{
+		Sender:    m.Sender,
+		Timestamp: m.Timestamp,
+		Target: User{
+			Nick:     targetNick,
+			Features: u.Features,
+		},
+		Online: online,
+	}
+
+	return ban, nil
+}
+
 func parseNames(s string) (namesMessage, error) {
 	var nm namesMessage
 	err := json.Unmarshal([]byte(s), &nm)

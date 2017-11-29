@@ -129,6 +129,22 @@ type (
 	Ping struct {
 		Timestamp int64 `json:"timestamp"`
 	}
+
+	// SubOnly represents a subonly message from the server
+	// if active, only subscribers and some other special user classes are allowed to send messages,
+	// until another SubOnly message is received with active set to false
+	SubOnly struct {
+		Sender    User
+		Timestamp time.Time
+		Active    bool
+	}
+
+	subOnly struct {
+		Data      string   `json:"data"`
+		Timestamp int64    `json:"timestamp"`
+		Nick      string   `json:"nick"`
+		Features  []string `json:"features"`
+	}
 )
 
 // HasFeature returns true if user has given feature

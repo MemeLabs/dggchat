@@ -38,15 +38,16 @@ type privateMessageOut struct {
 	Data string `json:"data"`
 }
 
-type banOut struct {
-	Nick     string        `json:"nick"`
-	Reason   string        `json:"reason,omitempty"`
-	Duration time.Duration `json:"duration,omitempty"`
-	Banip    bool          `json:"banip,omitempty"`
+type muteOut struct {
+	Data     string `json:"data"`
+	Duration int64  `data:"duration,omitempty"`
 }
 
-type subOnly struct {
-	SubOnly bool `json:"subonly"`
+type banOut struct {
+	Nick     string `json:"nick"`
+	Reason   string `json:"reason,omitempty"`
+	Duration int64  `json:"duration,omitempty"`
+	Banip    bool   `json:"banip,omitempty"`
 }
 
 type pingOut struct {
@@ -139,7 +140,7 @@ func (s *Session) listen(ws *websocket.Conn, listening <-chan bool) {
 		}
 
 		mType := mslice[0]
-		mContent := strings.Join(mslice[1:], " ")
+		mContent := mslice[1]
 
 		switch mType {
 
@@ -179,65 +180,52 @@ func (s *Session) listen(ws *websocket.Conn, listening <-chan bool) {
 			s.handlers.unbanHandler(ban, s)
 
 		case "SUBONLY":
-			//TODO
+			so, err := parseSubOnly(mContent)
+			if s.handlers.subOnlyHandler == nil || err != nil {
+				continue
+			}
+			s.handlers.subOnlyHandler(so, s)
+
 		case "BROADCAST":
-			if s.handlers.broadcastHandler == nil {
-				continue
-			}
-
 			b, err := parseBroadcast(mContent)
-			if err != nil {
+			if s.handlers.broadcastHandler == nil || err != nil {
 				continue
 			}
-
 			s.handlers.broadcastHandler(b, s)
 
 		case "PRIVMSG":
-			if s.handlers.pmHandler == nil {
+			pm, err := parsePrivateMessage(mContent, s)
+			if s.handlers.pmHandler == nil || err != nil {
 				continue
 			}
-
-			pm, err := parsePrivateMessage(mContent)
-			if err != nil {
-				continue
-			}
-
-			u, found := s.GetUser(pm.User.Nick)
-			if found {
-				pm.User = u
-			}
-
 			s.handlers.pmHandler(pm, s)
 
 		case "PRIVMSGSENT":
-			//TODO confirms the successful sending of a PM(?)
+			//TODO confirms sending of a PM was successful
+
 		case "PING":
 		case "PONG":
-			if s.handlers.pingHandler == nil {
-				continue
-			}
-
 			p, err := parsePing(mContent)
-			if err != nil {
+			if s.handlers.pingHandler == nil || err != nil {
 				continue
 			}
-
 			s.handlers.pingHandler(p, s)
+
 		case "ERR":
 			if s.handlers.errHandler == nil {
 				continue
 			}
-
 			errMessage := parseErrorMessage(mContent)
 			s.handlers.errHandler(errMessage, s)
+
 		case "NAMES":
 			n, err := parseNames(mContent)
 			if err != nil {
 				continue
 			}
-
 			s.state.users = n.Users
 			s.state.connections = n.Connections
+
 		case "JOIN":
 			ra, err := parseRoomAction(mContent)
 			if err != nil {
@@ -249,6 +237,7 @@ func (s *Session) listen(ws *websocket.Conn, listening <-chan bool) {
 			if s.handlers.joinHandler != nil {
 				s.handlers.joinHandler(ra, s)
 			}
+
 		case "QUIT":
 			ra, err := parseRoomAction(mContent)
 			if err != nil {
@@ -260,8 +249,10 @@ func (s *Session) listen(ws *websocket.Conn, listening <-chan bool) {
 			if s.handlers.quitHandler != nil {
 				s.handlers.quitHandler(ra, s)
 			}
+
 		case "REFRESH":
-			//TODO voluntary reconnect when server determines state should be refreshed
+			// TODO voluntary reconnect when server determines state should be refreshed
+			// happens e.g. when user-flair is modified in the database
 		}
 
 		select {
@@ -329,8 +320,12 @@ func (s *Session) SendMessage(message string) error {
 }
 
 // SendMute mutes the user with the given nick.
-func (s *Session) SendMute(nick string) error {
-	m := messageOut{Data: nick}
+// If duration is <= 0, the server uses its built-in default duration
+func (s *Session) SendMute(nick string, duration time.Duration) error {
+	m := muteOut{Data: nick}
+	if duration > 0 {
+		m.Duration = int64(duration)
+	}
 	return s.send(m, "MUTE")
 }
 
@@ -341,12 +336,16 @@ func (s *Session) SendUnmute(nick string) error {
 }
 
 // SendBan bans the user with the given nick.
-// Bans require a ban reason to be specified. TODO: ban duration is optional
+// Bans require a ban reason to be specified.
+// If duration is <= 0, the server uses its built-in default duration
 func (s *Session) SendBan(nick string, reason string, duration time.Duration, banip bool) error {
 	b := banOut{
-		Nick:     nick,
-		Reason:   reason,
-		Duration: duration,
+		Nick:   nick,
+		Reason: reason,
+		Banip:  banip,
+	}
+	if duration > 0 {
+		b.Duration = int64(duration)
 	}
 	return s.send(b, "BAN")
 }
@@ -377,7 +376,11 @@ func (s *Session) SendPrivateMessage(nick string, message string) error {
 // SendSubOnly modifies the chat subonly mode.
 // During subonly mode, only subscribers and some other special user classes are allowed to send messages.
 func (s *Session) SendSubOnly(subonly bool) error {
-	so := subOnly{SubOnly: subonly}
+	data := "off"
+	if subonly {
+		data = "on"
+	}
+	so := messageOut{Data: data}
 	return s.send(so, "SUBONLY")
 }
 

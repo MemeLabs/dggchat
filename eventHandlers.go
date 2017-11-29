@@ -24,17 +24,17 @@ func (s *Session) AddMuteHandler(fn func(Mute, *Session)) {
 	s.handlers.muteHandler = fn
 }
 
-// AddUnmuteHandler adds a function that will be called every time a mute message is received
+// AddUnmuteHandler adds a function that will be called every time an unmute message is received
 func (s *Session) AddUnmuteHandler(fn func(Mute, *Session)) {
 	s.handlers.muteHandler = fn
 }
 
-// AddBanHandler adds a function that will be called every time a mute message is received
+// AddBanHandler adds a function that will be called every time a ban message is received
 func (s *Session) AddBanHandler(fn func(Ban, *Session)) {
 	s.handlers.banHandler = fn
 }
 
-// AddUnbanHandler adds a function that will be called every time a mute message is received
+// AddUnbanHandler adds a function that will be called every time an unban message is received
 func (s *Session) AddUnbanHandler(fn func(Ban, *Session)) {
 	s.handlers.banHandler = fn
 }

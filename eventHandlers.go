@@ -37,7 +37,7 @@ func (s *Session) AddBanHandler(fn func(Ban, *Session)) {
 
 // AddUnbanHandler adds a function that will be called every time an unban message is received
 func (s *Session) AddUnbanHandler(fn func(Ban, *Session)) {
-	s.handlers.banHandler = fn
+	s.handlers.unbanHandler = fn
 }
 
 // AddErrorHandler adds a function that will be called every time an error message is received

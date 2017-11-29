@@ -118,6 +118,15 @@ func (s *Session) Close() error {
 	return nil
 }
 
+// GetUsers returns a list of users currently online
+func (s *Session) GetUsers() []User {
+	s.state.RLock()
+	defer s.state.RUnlock()
+	u := make([]User, len(s.state.users))
+	copy(u, s.state.users)
+	return u
+}
+
 func (s *Session) listen(ws *websocket.Conn, listening <-chan bool) {
 	for {
 		_, message, err := s.ws.ReadMessage()

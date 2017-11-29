@@ -26,8 +26,8 @@ func (s *state) removeUser(nick string) {
 func (s *state) addUser(user User) {
 	s.Lock()
 	defer s.Unlock()
-
 	s.users = append(s.users, user)
+	s.connections++
 }
 
 func newState() *state {

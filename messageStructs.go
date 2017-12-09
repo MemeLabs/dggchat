@@ -26,6 +26,7 @@ const (
 	FeatureBot2          = "flair11"
 	FeatureBroadcaster   = "flair12"
 	FeatureTier1         = "flair13"
+	FeatureBirthday      = "flair15"
 )
 
 // Constants for different types of errors the chat can return
@@ -76,7 +77,8 @@ type (
 		Online bool
 	}
 
-	namesMessage struct {
+	// Names reprents the initial status message containing user information
+	Names struct {
 		Connections int    `json:"connectioncount"`
 		Users       []User `json:"users"`
 	}
@@ -116,13 +118,9 @@ type (
 
 	// Broadcast represents a chat broadcast
 	Broadcast struct {
-		Message   string
+		Sender    User
 		Timestamp time.Time
-	}
-
-	broadcast struct {
-		Data      string `json:"data"`
-		Timestamp int64  `json:"timestamp"`
+		Message   string
 	}
 
 	// Ping represents a pong response from the server

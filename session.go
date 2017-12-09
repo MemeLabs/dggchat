@@ -17,16 +17,15 @@ import (
 type Session struct {
 	sync.RWMutex
 	// If true, attempt to reconnect on error
-	AttempToReconnect bool
+	attempToReconnect bool
 
-	readOnly  bool
-	loginKey  string
-	listening chan bool
-	wsURL     url.URL
-	ws        *websocket.Conn
-	handlers  handlers
-	state     *state
-	dialer    *websocket.Dialer
+	readOnly bool
+	loginKey string
+	wsURL    url.URL
+	ws       *websocket.Conn
+	handlers handlers
+	state    *state
+	dialer   *websocket.Dialer
 }
 
 type messageOut struct {
@@ -44,10 +43,11 @@ type muteOut struct {
 }
 
 type banOut struct {
-	Nick     string `json:"nick"`
-	Reason   string `json:"reason,omitempty"`
-	Duration int64  `json:"duration,omitempty"`
-	Banip    bool   `json:"banip,omitempty"`
+	Nick        string `json:"nick"`
+	Reason      string `json:"reason,omitempty"`
+	Duration    int64  `json:"duration,omitempty"`
+	Banip       bool   `json:"banip,omitempty"`
+	Ispermanent bool   `json:"ispermanent"`
 }
 
 type pingOut struct {
@@ -66,25 +66,42 @@ var wsURL = url.URL{Scheme: "wss", Host: "www.destiny.gg", Path: "/ws"}
 // SetURL changes the url that will be used when connecting to the socket server.
 // This should be done before calling *session.Open()
 func (s *Session) SetURL(u url.URL) {
+	s.Lock()
+	defer s.Unlock()
 	s.wsURL = u
 }
 
 // SetDialer changes the websocket dialer that will be used when connecting to the socket server.
 func (s *Session) SetDialer(d websocket.Dialer) {
+	s.Lock()
+	defer s.Unlock()
 	s.dialer = &d
 }
 
 // Open opens a websocket connection to destinygg chat.
 func (s *Session) Open() error {
+
 	s.Lock()
 	defer s.Unlock()
 
+	// Only support a single Open() call.
 	if s.ws != nil {
 		return ErrAlreadyOpen
 	}
+	return s.open()
+}
+
+// call with locks held
+func (s *Session) open() error {
+
+	// Repeatedly calling Open() acts like reconnect.
+	// this makes sure any old routines die.
+	if s.ws != nil {
+		_ = s.ws.Close()
+		s.ws = nil
+	}
 
 	header := http.Header{}
-
 	if !s.readOnly {
 		header.Add("Cookie", fmt.Sprintf("authtoken=%s", s.loginKey))
 	}
@@ -93,17 +110,22 @@ func (s *Session) Open() error {
 	if err != nil {
 		return err
 	}
-
 	s.ws = ws
-	s.listening = make(chan bool)
 
-	go s.listen(s.ws, s.listening)
+	go s.listen()
 
 	return nil
 }
 
 // Close cleanly closes the connection and stops running listeners
 func (s *Session) Close() error {
+
+	s.Lock()
+	defer s.Unlock()
+
+	// Assume if Close() is explicitly called, we do not want reconnection behaviour
+	s.attempToReconnect = false
+
 	if s.ws == nil {
 		return nil
 	}
@@ -114,33 +136,40 @@ func (s *Session) Close() error {
 	}
 
 	s.ws = nil
-
 	return nil
 }
 
-// GetUsers returns a list of users currently online
-func (s *Session) GetUsers() []User {
-	s.state.RLock()
-	defer s.state.RUnlock()
-	u := make([]User, len(s.state.users))
-	copy(u, s.state.users)
-	return u
+func (s *Session) reconnect() {
+
+	wait := 1
+	for {
+		s.Lock()
+		err := s.open()
+		s.Unlock()
+
+		if err == nil {
+			return
+		}
+
+		wait *= 2
+		if wait > 32 {
+			wait = 32
+		}
+		time.Sleep(time.Duration(wait) * time.Second)
+	}
 }
 
-func (s *Session) listen(ws *websocket.Conn, listening <-chan bool) {
+func (s *Session) listen() {
 	for {
 		_, message, err := s.ws.ReadMessage()
 		if err != nil {
-			if ws != s.ws {
-				return
+			if s.handlers.socketErrorHandler != nil {
+				s.handlers.socketErrorHandler(err, s)
 			}
-
-			err := ws.Close()
-			if err != nil {
-				return
+			if s.attempToReconnect {
+				s.reconnect()
 			}
-
-			s.reconnect()
+			return
 		}
 
 		mslice := strings.SplitN(string(message[:]), " ", 2)
@@ -210,8 +239,8 @@ func (s *Session) listen(ws *websocket.Conn, listening <-chan bool) {
 			s.handlers.pmHandler(pm, s)
 
 		case "PRIVMSGSENT":
-			//TODO confirms sending of a PM was successful
-
+			// confirms sending of a PM was successful.
+			// If not successful, an ERR message is sent anyways. Ignore this.
 		case "PING":
 		case "PONG":
 			p, err := parsePing(mContent)
@@ -232,8 +261,13 @@ func (s *Session) listen(ws *websocket.Conn, listening <-chan bool) {
 			if err != nil {
 				continue
 			}
+			s.state.Lock()
 			s.state.users = n.Users
-			s.state.connections = n.Connections
+			s.state.Unlock()
+
+			if s.handlers.namesHandler != nil {
+				s.handlers.namesHandler(n, s)
+			}
 
 		case "JOIN":
 			ra, err := parseRoomAction(mContent)
@@ -260,35 +294,12 @@ func (s *Session) listen(ws *websocket.Conn, listening <-chan bool) {
 			}
 
 		case "REFRESH":
-			// TODO voluntary reconnect when server determines state should be refreshed
-			// happens e.g. when user-flair is modified in the database
-		}
+			// This message is received immediately before the server closes the
+			// connection because user information was changed, and we need to reinitialize.
 
-		select {
-		case <-listening:
+			// TODO possibly add an eventhandler here
+			s.reconnect()
 			return
-		default:
-		}
-	}
-}
-
-func (s *Session) reconnect() {
-	if !s.AttempToReconnect {
-		return
-	}
-
-	wait := 1
-	for {
-		err := s.Open()
-		if err == nil || err == ErrAlreadyOpen {
-			return
-		}
-
-		wait *= 2
-		<-time.After(time.Duration(wait) * time.Second)
-
-		if wait > 600 {
-			wait = 600
 		}
 	}
 }
@@ -297,8 +308,8 @@ func (s *Session) reconnect() {
 // If the user is found, returns the user and true,
 // otherwise false is returned as the second parameter.
 func (s *Session) GetUser(name string) (User, bool) {
-	s.RLock()
-	defer s.RUnlock()
+	s.state.RLock()
+	defer s.state.RUnlock()
 
 	for _, user := range s.state.users {
 		if strings.EqualFold(name, user.Nick) {
@@ -309,6 +320,15 @@ func (s *Session) GetUser(name string) (User, bool) {
 	return User{}, false
 }
 
+// GetUsers returns a list of users currently online
+func (s *Session) GetUsers() []User {
+	s.state.RLock()
+	defer s.state.RUnlock()
+	u := make([]User, len(s.state.users))
+	copy(u, s.state.users)
+	return u
+}
+
 func (s *Session) send(message interface{}, mType string) error {
 	if s.readOnly {
 		return ErrReadOnly
@@ -316,6 +336,13 @@ func (s *Session) send(message interface{}, mType string) error {
 	m, err := json.Marshal(message)
 	if err != nil {
 		return err
+	}
+
+	s.Lock()
+	defer s.Unlock()
+	// Close() might have been called for some reason, this prevents panicing in those cases
+	if s.ws == nil {
+		return errors.New("connection not established")
 	}
 	return s.ws.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("%s %s", mType, m)))
 }
@@ -359,6 +386,18 @@ func (s *Session) SendBan(nick string, reason string, duration time.Duration, ba
 	return s.send(b, "BAN")
 }
 
+// SendPermanentBan bans the user with the given nick permanently.
+// Bans require a ban reason to be specified.
+func (s *Session) SendPermanentBan(nick string, reason string, banip bool) error {
+	b := banOut{
+		Nick:        nick,
+		Reason:      reason,
+		Banip:       banip,
+		Ispermanent: true,
+	}
+	return s.send(b, "BAN")
+}
+
 // SendUnban unbans the user with the given nick.
 // Unbanning also removes mutes.
 func (s *Session) SendUnban(nick string) error {
@@ -391,6 +430,12 @@ func (s *Session) SendSubOnly(subonly bool) error {
 	}
 	so := messageOut{Data: data}
 	return s.send(so, "SUBONLY")
+}
+
+// SendBroadcast sends a broadcast message to chat
+func (s *Session) SendBroadcast(message string) error {
+	b := messageOut{Data: message}
+	return s.send(b, "BROADCAST")
 }
 
 // SendPing sends a ping to the server with the current timestamp.

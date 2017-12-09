@@ -18,7 +18,7 @@ func New(args ...string) (*Session, error) {
 	}
 
 	s := &Session{
-		AttempToReconnect: true,
+		attempToReconnect: true,
 		state:             newState(),
 		wsURL:             wsURL,
 		dialer:            websocket.DefaultDialer,

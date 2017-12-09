@@ -74,14 +74,14 @@ func parseBan(s string, sess *Session) (Ban, error) {
 	return ban, nil
 }
 
-func parseNames(s string) (namesMessage, error) {
-	var nm namesMessage
-	err := json.Unmarshal([]byte(s), &nm)
+func parseNames(s string) (Names, error) {
+	var n Names
+	err := json.Unmarshal([]byte(s), &n)
 	if err != nil {
-		return namesMessage{}, err
+		return Names{}, err
 	}
 
-	return nm, nil
+	return n, nil
 }
 
 func parseRoomAction(s string) (RoomAction, error) {
@@ -134,16 +134,22 @@ func parsePrivateMessage(s string, sess *Session) (PrivateMessage, error) {
 }
 
 func parseBroadcast(s string) (Broadcast, error) {
-	var b broadcast
+	var m message
 
-	err := json.Unmarshal([]byte(s), &b)
+	err := json.Unmarshal([]byte(s), &m)
 	if err != nil {
 		return Broadcast{}, err
 	}
 
+	user := User{
+		Nick:     m.Nick,
+		Features: m.Features,
+	}
+
 	broadcast := Broadcast{
-		Message:   b.Data,
-		Timestamp: unixToTime(b.Timestamp),
+		Sender:    user,
+		Message:   m.Data,
+		Timestamp: unixToTime(m.Timestamp),
 	}
 
 	return broadcast, nil

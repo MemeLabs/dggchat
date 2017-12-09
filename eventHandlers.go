@@ -2,6 +2,7 @@ package dggchat
 
 type handlers struct {
 	msgHandler       func(Message, *Session)
+	namesHandler     func(Names, *Session)
 	muteHandler      func(Mute, *Session)
 	unmuteHandler    func(Mute, *Session)
 	banHandler       func(Ban, *Session)
@@ -13,11 +14,18 @@ type handlers struct {
 	broadcastHandler func(Broadcast, *Session)
 	pingHandler      func(Ping, *Session)
 	subOnlyHandler   func(SubOnly, *Session)
+
+	socketErrorHandler func(error, *Session)
 }
 
 // AddMessageHandler adds a function that will be called every time a message is received
 func (s *Session) AddMessageHandler(fn func(Message, *Session)) {
 	s.handlers.msgHandler = fn
+}
+
+// AddNamesHandler adds a function that will be called every time a names message is received
+func (s *Session) AddNamesHandler(fn func(Names, *Session)) {
+	s.handlers.namesHandler = fn
 }
 
 // AddMuteHandler adds a function that will be called every time a mute message is received
@@ -73,4 +81,9 @@ func (s *Session) AddPingHandler(fn func(Ping, *Session)) {
 // AddSubOnlyHandler adds a function that will will be called every time a subonly message is received
 func (s *Session) AddSubOnlyHandler(fn func(SubOnly, *Session)) {
 	s.handlers.subOnlyHandler = fn
+}
+
+// AddSocketErrorHandler adds a function that will be called every time a socket error occurs
+func (s *Session) AddSocketErrorHandler(fn func(error, *Session)) {
+	s.handlers.socketErrorHandler = fn
 }

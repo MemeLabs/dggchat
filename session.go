@@ -61,7 +61,7 @@ var ErrAlreadyOpen = errors.New("web socket is already open")
 // ErrReadOnly is thrown when attempting to send messages using a read-only session.
 var ErrReadOnly = errors.New("session is read-only")
 
-var wsURL = url.URL{Scheme: "wss", Host: "www.destiny.gg", Path: "/ws"}
+var wsURL = url.URL{Scheme: "wss", Host: "chat.destiny.gg", Path: "/ws"}
 
 // SetURL changes the url that will be used when connecting to the socket server.
 // This should be done before calling *session.Open()
@@ -102,6 +102,7 @@ func (s *Session) open() error {
 	}
 
 	header := http.Header{}
+	header.Add("Origin", "https://www.destiny.gg")
 	if !s.readOnly {
 		header.Add("Cookie", fmt.Sprintf("authtoken=%s", s.loginKey))
 	}

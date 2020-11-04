@@ -102,7 +102,7 @@ func (s *Session) open() error {
 	}
 
 	header := http.Header{}
-	header.Add("Origin", "https://destiny.gg")
+	header.Add("Origin", "https://www.destiny.gg")
 	if !s.readOnly {
 		header.Add("Cookie", fmt.Sprintf("authtoken=%s", s.loginKey))
 	}

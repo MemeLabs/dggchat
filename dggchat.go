@@ -27,6 +27,8 @@ func New(args ...string) (*Session, error) {
 	customHost, customHostExist := os.LookupEnv("CUSTOM_WSHOST")
 	if customHostExist {
 		s.wsURL = url.URL{Scheme: "wss", Host: customHost, Path: "/wss"}
+	} else {
+		s.wsURL = wsURL
 	}
 	customOriginHeader, customOriginHeaderExist := os.LookupEnv("CUSTOM_ORIGINHEADER")
 	if customOriginHeaderExist {

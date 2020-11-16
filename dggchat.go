@@ -3,6 +3,8 @@ package dggchat
 
 import (
 	"errors"
+	"net/url"
+	"os"
 
 	"github.com/gorilla/websocket"
 )
@@ -13,15 +15,22 @@ var ErrTooManyArgs = errors.New("function called with unexcepted amount of argum
 // New creates a new destinygg session. Accepts either 0 or 1 arguments.
 // If no login key is provided, a read-only session is returned
 func New(args ...string) (*Session, error) {
+
 	if len(args) > 1 {
 		return nil, ErrTooManyArgs
 	}
-
 	s := &Session{
 		attempToReconnect: true,
 		state:             newState(),
-		wsURL:             wsURL,
 		dialer:            websocket.DefaultDialer,
+	}
+	customHost, customHostExist := os.LookupEnv("CUSTOM_WSHOST")
+	if customHostExist {
+		s.wsURL = url.URL{Scheme: "wss", Host: customHost, Path: "/wss"}
+	}
+	customOriginHeader, customOriginHeaderExist := os.LookupEnv("CUSTOM_ORIGINHEADER")
+	if customOriginHeaderExist {
+		s.originHeader = customOriginHeader
 	}
 	if len(args) == 1 {
 		s.loginKey = args[0]

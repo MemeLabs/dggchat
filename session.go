@@ -19,13 +19,14 @@ type Session struct {
 	// If true, attempt to reconnect on error
 	attempToReconnect bool
 
-	readOnly bool
-	loginKey string
-	wsURL    url.URL
-	ws       *websocket.Conn
-	handlers handlers
-	state    *state
-	dialer   *websocket.Dialer
+	readOnly     bool
+	loginKey     string
+	originHeader string
+	wsURL        url.URL
+	ws           *websocket.Conn
+	handlers     handlers
+	state        *state
+	dialer       *websocket.Dialer
 }
 
 type messageOut struct {
@@ -102,6 +103,12 @@ func (s *Session) open() error {
 	}
 
 	header := http.Header{}
+	if strings.TrimSpace(s.originHeader) != "" {
+		_, err := url.ParseRequestURI(s.originHeader)
+		if err != nil {
+			header.Add("Origin", s.originHeader)
+		}
+	}
 	if !s.readOnly {
 		header.Add("Cookie", fmt.Sprintf("authtoken=%s", s.loginKey))
 	}

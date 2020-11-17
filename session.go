@@ -106,8 +106,9 @@ func (s *Session) open() error {
 	if strings.TrimSpace(s.originHeader) != "" {
 		_, err := url.ParseRequestURI(s.originHeader)
 		if err != nil {
-			header.Add("Origin", s.originHeader)
+			return err
 		}
+		header.Add("Origin", s.originHeader)
 	}
 	if !s.readOnly {
 		header.Add("Cookie", fmt.Sprintf("authtoken=%s", s.loginKey))

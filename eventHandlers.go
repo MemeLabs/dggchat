@@ -2,6 +2,7 @@ package dggchat
 
 type handlers struct {
 	msgHandler       func(Message, *Session)
+	pinHandler       func(Pin, *Session)
 	namesHandler     func(Names, *Session)
 	muteHandler      func(Mute, *Session)
 	unmuteHandler    func(Mute, *Session)
@@ -21,6 +22,10 @@ type handlers struct {
 // AddMessageHandler adds a function that will be called every time a message is received
 func (s *Session) AddMessageHandler(fn func(Message, *Session)) {
 	s.handlers.msgHandler = fn
+}
+
+func (s *Session) AddPinHandler(fn func(Pin, *Session)) {
+	s.handlers.pinHandler = fn
 }
 
 // AddNamesHandler adds a function that will be called every time a names message is received

@@ -197,6 +197,13 @@ func (s *Session) listen() {
 			}
 			s.handlers.msgHandler(m, s)
 
+		case "PIN":
+			pin, err := parsePin(mContent)
+			if s.handlers.pinHandler == nil || err != nil {
+				continue
+			}
+			s.handlers.pinHandler(pin, s)
+
 		case "MUTE":
 			mute, err := parseMute(mContent, s)
 			if s.handlers.muteHandler == nil || err != nil {

@@ -59,6 +59,22 @@ type (
 		Data      string   `json:"data"`
 	}
 
+	// Pin represents a pinned dgg message, AKA message of the day (MOTD)
+	Pin struct {
+		Sender    User
+		Timestamp time.Time
+		Message   string
+		UUID      string
+	}
+
+	pin struct {
+		Nick      string   `json:"nick"`
+		Features  []string `json:"features"`
+		UUID      string   `json:"uuid"`
+		Data      string   `json:"data"`
+		Timestamp int64    `json:"timestamp"`
+	}
+
 	// Mute represents (un)mutes issued by chat moderators
 	Mute struct {
 		Sender    User

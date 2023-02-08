@@ -28,6 +28,27 @@ func parseMessage(s string) (Message, error) {
 	return message, nil
 }
 
+func parsePin(s string) (Pin, error) {
+	var p pin
+	if err := json.Unmarshal([]byte(s), &p); err != nil {
+		return Pin{}, err
+	}
+
+	user := User{
+		Nick:     p.Nick,
+		Features: p.Features,
+	}
+
+	pin := Pin{
+		Sender:    user,
+		Timestamp: unixToTime(p.Timestamp),
+		Message:   p.Data,
+		UUID:      p.UUID,
+	}
+
+	return pin, nil
+}
+
 func parseMute(s string, sess *Session) (Mute, error) {
 	m, err := parseMessage(s)
 	if err != nil {

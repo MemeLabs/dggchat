@@ -216,7 +216,7 @@ func parsePing(s string) (Ping, error) {
 }
 
 func unixToTime(stamp int64) time.Time {
-	return time.Unix(stamp/1000, 0)
+	return time.Unix(stamp/1e3, (stamp%1e3)*1e6)
 }
 
 func timeToUnix(t time.Time) int64 {

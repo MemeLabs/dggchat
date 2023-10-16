@@ -322,6 +322,18 @@ func (s *Session) listen() {
 				s.handlers.quitHandler(ra, s)
 			}
 
+		case "UPDATEUSER":
+			u, err := parseUpdateUser(mContent)
+			if err != nil {
+				continue
+			}
+
+			s.state.updateUser(u)
+
+			if s.handlers.userUpdateHandler != nil {
+				s.handlers.userUpdateHandler(u, s)
+			}
+
 		case "REFRESH":
 			// This message is received immediately before the server closes the
 			// connection because user information was changed, and we need to reinitialize.

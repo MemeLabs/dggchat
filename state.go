@@ -39,6 +39,17 @@ func (s *state) addUser(user User) {
 	s.users = append(s.users, user)
 }
 
+func (s *state) updateUser(user User) {
+	s.Lock()
+	defer s.Unlock()
+
+	for i, u := range s.users {
+		if user.ID == u.ID {
+			s.users[i] = user
+		}
+	}
+}
+
 func newState() *state {
 	s := &state{
 		users: make([]User, 0),

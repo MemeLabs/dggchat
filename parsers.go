@@ -19,6 +19,7 @@ func parseMessage(s string) (Message, error) {
 		Nick:        m.Nick,
 		Features:    m.Features,
 		CreatedDate: m.CreatedDate,
+		Watching:    m.Watching,
 	}
 
 	message := Message{
@@ -41,6 +42,7 @@ func parsePin(s string) (Pin, error) {
 		Nick:        p.Nick,
 		Features:    p.Features,
 		CreatedDate: p.CreatedDate,
+		Watching:    p.Watching,
 	}
 
 	pin := Pin{
@@ -71,6 +73,7 @@ func parseMute(s string, sess *Session) (Mute, error) {
 			Nick:        u.Nick,
 			Features:    u.Features,
 			CreatedDate: u.CreatedDate,
+			Watching:    u.Watching,
 		},
 		Online: online,
 	}
@@ -96,6 +99,7 @@ func parseBan(s string, sess *Session) (Ban, error) {
 			Nick:        u.Nick,
 			Features:    u.Features,
 			CreatedDate: u.CreatedDate,
+			Watching:    u.Watching,
 		},
 		Online: online,
 	}
@@ -127,6 +131,7 @@ func parseRoomAction(s string) (RoomAction, error) {
 			Nick:        ra.Nick,
 			Features:    ra.Features,
 			CreatedDate: ra.CreatedDate,
+			Watching:    ra.Watching,
 		},
 		Timestamp: unixToTime(ra.Timestamp),
 	}
@@ -244,6 +249,7 @@ func parseSubOnly(s string) (SubOnly, error) {
 			Nick:        so.Nick,
 			Features:    so.Features,
 			CreatedDate: so.CreatedDate,
+			Watching:    so.Watching,
 		},
 		Timestamp: unixToTime(so.Timestamp),
 		// the backend specifies values "on" and "off" ONLY.

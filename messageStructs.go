@@ -137,6 +137,12 @@ type (
 		Sender    User
 		Timestamp time.Time
 		Message   string
+		UUID      string
+	}
+
+	broadcast struct {
+		message
+		UUID string `json:"uuid"`
 	}
 
 	// Ping represents a pong response from the server

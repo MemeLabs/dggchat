@@ -155,7 +155,7 @@ func parsePrivateMessage(s string, sess *Session) (PrivateMessage, error) {
 }
 
 func parseBroadcast(s string) (Broadcast, error) {
-	var m message
+	var m broadcast
 
 	err := json.Unmarshal([]byte(s), &m)
 	if err != nil {

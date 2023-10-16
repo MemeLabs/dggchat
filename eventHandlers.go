@@ -24,6 +24,7 @@ func (s *Session) AddMessageHandler(fn func(Message, *Session)) {
 	s.handlers.msgHandler = fn
 }
 
+// AddPinHandler adds a function that will be called every time a pin message is received
 func (s *Session) AddPinHandler(fn func(Pin, *Session)) {
 	s.handlers.pinHandler = fn
 }

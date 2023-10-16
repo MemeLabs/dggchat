@@ -15,8 +15,10 @@ func parseMessage(s string) (Message, error) {
 	}
 
 	user := User{
-		Nick:     m.Nick,
-		Features: m.Features,
+		ID:          m.ID,
+		Nick:        m.Nick,
+		Features:    m.Features,
+		CreatedDate: m.CreatedDate,
 	}
 
 	message := Message{
@@ -35,8 +37,10 @@ func parsePin(s string) (Pin, error) {
 	}
 
 	user := User{
-		Nick:     p.Nick,
-		Features: p.Features,
+		ID:          p.ID,
+		Nick:        p.Nick,
+		Features:    p.Features,
+		CreatedDate: p.CreatedDate,
 	}
 
 	pin := Pin{
@@ -63,8 +67,10 @@ func parseMute(s string, sess *Session) (Mute, error) {
 		Sender:    m.Sender,
 		Timestamp: m.Timestamp,
 		Target: User{
-			Nick:     targetNick,
-			Features: u.Features,
+			ID:          u.ID,
+			Nick:        u.Nick,
+			Features:    u.Features,
+			CreatedDate: u.CreatedDate,
 		},
 		Online: online,
 	}
@@ -86,8 +92,10 @@ func parseBan(s string, sess *Session) (Ban, error) {
 		Sender:    m.Sender,
 		Timestamp: m.Timestamp,
 		Target: User{
-			Nick:     targetNick,
-			Features: u.Features,
+			ID:          u.ID,
+			Nick:        u.Nick,
+			Features:    u.Features,
+			CreatedDate: u.CreatedDate,
 		},
 		Online: online,
 	}
@@ -115,8 +123,10 @@ func parseRoomAction(s string) (RoomAction, error) {
 
 	roomAction := RoomAction{
 		User: User{
-			Nick:     ra.Nick,
-			Features: ra.Features,
+			ID:          ra.ID,
+			Nick:        ra.Nick,
+			Features:    ra.Features,
+			CreatedDate: ra.CreatedDate,
 		},
 		Timestamp: unixToTime(ra.Timestamp),
 	}
@@ -220,8 +230,10 @@ func parseSubOnly(s string) (SubOnly, error) {
 
 	subonly := SubOnly{
 		Sender: User{
-			Nick:     so.Nick,
-			Features: so.Features,
+			ID:          so.ID,
+			Nick:        so.Nick,
+			Features:    so.Features,
+			CreatedDate: so.CreatedDate,
 		},
 		Timestamp: unixToTime(so.Timestamp),
 		// the backend specifies values "on" and "off" ONLY.

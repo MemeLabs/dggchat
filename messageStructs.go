@@ -53,10 +53,9 @@ type (
 	}
 
 	message struct {
-		Nick      string   `json:"nick"`
-		Features  []string `json:"features"`
-		Timestamp int64    `json:"timestamp"`
-		Data      string   `json:"data"`
+		User
+		Timestamp int64  `json:"timestamp"`
+		Data      string `json:"data"`
 	}
 
 	// Pin represents a pinned dgg message, AKA message of the day (MOTD)
@@ -68,11 +67,10 @@ type (
 	}
 
 	pin struct {
-		Nick      string   `json:"nick"`
-		Features  []string `json:"features"`
-		UUID      string   `json:"uuid"`
-		Data      string   `json:"data"`
-		Timestamp int64    `json:"timestamp"`
+		User
+		UUID      string `json:"uuid"`
+		Data      string `json:"data"`
+		Timestamp int64  `json:"timestamp"`
 	}
 
 	// Mute represents (un)mutes issued by chat moderators
@@ -101,8 +99,10 @@ type (
 
 	// User represents a user with a list of features
 	User struct {
-		Nick     string   `json:"nick"`
-		Features []string `json:"features"`
+		ID          int64     `json:"id"`
+		Nick        string    `json:"nick"`
+		Features    []string  `json:"features"`
+		CreatedDate time.Time `json:"createdDate"`
 	}
 
 	// RoomAction represents a user joining or quitting the chat
@@ -112,9 +112,8 @@ type (
 	}
 
 	roomAction struct {
-		Nick      string   `json:"nick"`
-		Features  []string `json:"features"`
-		Timestamp int64    `json:"timestamp"`
+		User
+		Timestamp int64 `json:"timestamp"`
 	}
 
 	// PrivateMessage represents a received private message from a user
@@ -203,10 +202,9 @@ type (
 	}
 
 	subOnly struct {
-		Data      string   `json:"data"`
-		Timestamp int64    `json:"timestamp"`
-		Nick      string   `json:"nick"`
-		Features  []string `json:"features"`
+		User
+		Data      string `json:"data"`
+		Timestamp int64  `json:"timestamp"`
 	}
 )
 

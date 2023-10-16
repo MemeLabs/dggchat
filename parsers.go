@@ -155,25 +155,13 @@ func parsePrivateMessage(s string, sess *Session) (PrivateMessage, error) {
 }
 
 func parseBroadcast(s string) (Broadcast, error) {
-	var m broadcast
+	var m Broadcast
 
-	err := json.Unmarshal([]byte(s), &m)
-	if err != nil {
+	if err := json.Unmarshal([]byte(s), &m); err != nil {
 		return Broadcast{}, err
 	}
 
-	user := User{
-		Nick:     m.Nick,
-		Features: m.Features,
-	}
-
-	broadcast := Broadcast{
-		Sender:    user,
-		Message:   m.Data,
-		Timestamp: unixToTime(m.Timestamp),
-	}
-
-	return broadcast, nil
+	return m, nil
 }
 
 func parseSubscription(s string) (Subscription, error) {

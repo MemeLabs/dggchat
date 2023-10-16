@@ -1,20 +1,22 @@
 package dggchat
 
 type handlers struct {
-	msgHandler       func(Message, *Session)
-	pinHandler       func(Pin, *Session)
-	namesHandler     func(Names, *Session)
-	muteHandler      func(Mute, *Session)
-	unmuteHandler    func(Mute, *Session)
-	banHandler       func(Ban, *Session)
-	unbanHandler     func(Ban, *Session)
-	errHandler       func(string, *Session)
-	joinHandler      func(RoomAction, *Session)
-	quitHandler      func(RoomAction, *Session)
-	pmHandler        func(PrivateMessage, *Session)
-	broadcastHandler func(Broadcast, *Session)
-	pingHandler      func(Ping, *Session)
-	subOnlyHandler   func(SubOnly, *Session)
+	msgHandler          func(Message, *Session)
+	pinHandler          func(Pin, *Session)
+	namesHandler        func(Names, *Session)
+	muteHandler         func(Mute, *Session)
+	unmuteHandler       func(Mute, *Session)
+	banHandler          func(Ban, *Session)
+	unbanHandler        func(Ban, *Session)
+	errHandler          func(string, *Session)
+	joinHandler         func(RoomAction, *Session)
+	quitHandler         func(RoomAction, *Session)
+	pmHandler           func(PrivateMessage, *Session)
+	broadcastHandler    func(Broadcast, *Session)
+	subscriptionHandler func(Subscription, *Session)
+	donationHandler     func(Donation, *Session)
+	pingHandler         func(Ping, *Session)
+	subOnlyHandler      func(SubOnly, *Session)
 
 	socketErrorHandler func(error, *Session)
 }
@@ -77,6 +79,16 @@ func (s *Session) AddPMHandler(fn func(PrivateMessage, *Session)) {
 // AddBroadcastHandler adds a function that will be called every time a broadcast is sent to the chat
 func (s *Session) AddBroadcastHandler(fn func(Broadcast, *Session)) {
 	s.handlers.broadcastHandler = fn
+}
+
+// AddSubscriptionHandler adds a function that will be called every time a (regular, gifted, or a mass gift) subscription message is received
+func (s *Session) AddSubscriptionHandler(fn func(Subscription, *Session)) {
+	s.handlers.subscriptionHandler = fn
+}
+
+// AddDonationHandler adds a function that will be called every time a donation message is received
+func (s *Session) AddDonationHandler(fn func(Donation, *Session)) {
+	s.handlers.donationHandler = fn
 }
 
 // AddPingHandler adds a function that will be called when a server responds with a pong

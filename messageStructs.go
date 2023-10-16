@@ -103,6 +103,12 @@ type (
 		Nick        string    `json:"nick"`
 		Features    []string  `json:"features"`
 		CreatedDate time.Time `json:"createdDate"`
+		Watching    watching  `json:"watching"`
+	}
+
+	watching struct {
+		Platform string `json:"platform"`
+		ID       string `json:"id"`
 	}
 
 	// RoomAction represents a user joining or quitting the chat

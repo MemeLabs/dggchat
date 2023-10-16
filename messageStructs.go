@@ -136,13 +136,8 @@ type (
 	Broadcast struct {
 		Sender    User
 		Timestamp time.Time
-		Message   string
-		UUID      string
-	}
-
-	broadcast struct {
-		message
-		UUID string `json:"uuid"`
+		Message   string `json:"data"`
+		UUID      string `json:"uuid"`
 	}
 
 	// SubTier represents a dgg subscription tier

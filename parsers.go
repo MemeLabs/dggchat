@@ -134,6 +134,16 @@ func parseRoomAction(s string) (RoomAction, error) {
 	return roomAction, nil
 }
 
+func parseUpdateUser(s string) (User, error) {
+	var u User
+
+	if err := json.Unmarshal([]byte(s), &u); err != nil {
+		return User{}, err
+	}
+
+	return u, nil
+}
+
 func parseErrorMessage(s string) string {
 	return strings.Replace(s, `"`, "", -1)
 }

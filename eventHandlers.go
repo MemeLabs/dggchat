@@ -11,6 +11,7 @@ type handlers struct {
 	errHandler          func(string, *Session)
 	joinHandler         func(RoomAction, *Session)
 	quitHandler         func(RoomAction, *Session)
+	userUpdateHandler   func(User, *Session)
 	pmHandler           func(PrivateMessage, *Session)
 	broadcastHandler    func(Broadcast, *Session)
 	subscriptionHandler func(Subscription, *Session)
@@ -69,6 +70,11 @@ func (s *Session) AddJoinHandler(fn func(RoomAction, *Session)) {
 // AddQuitHandler adds a function that will be called every time a user quits the chat
 func (s *Session) AddQuitHandler(fn func(RoomAction, *Session)) {
 	s.handlers.quitHandler = fn
+}
+
+// AddUserUpdateHandler adds a function that will be called every time user's information gets updated
+func (s *Session) AddUserUpdateHandler(fn func(User, *Session)) {
+	s.handlers.userUpdateHandler = fn
 }
 
 // AddPMHandler adds a function that will be called every time a private message is received

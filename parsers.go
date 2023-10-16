@@ -176,6 +176,52 @@ func parseBroadcast(s string) (Broadcast, error) {
 	return broadcast, nil
 }
 
+func parseSubscription(s string) (Subscription, error) {
+	var sub subscription
+	if err := json.Unmarshal([]byte(s), &sub); err != nil {
+		return Subscription{}, err
+	}
+
+	recipient := sub.Recipient
+	if recipient.Nick == "" {
+		recipient = sub.User
+	}
+
+	tier := SubTier{
+		Tier:  sub.Tier,
+		Label: sub.TierLabel,
+	}
+
+	subscription := Subscription{
+		Sender:    sub.User,
+		Recipient: recipient,
+		Timestamp: unixToTime(sub.Timestamp),
+		Message:   sub.Data,
+		Tier:      tier,
+		Quantity:  sub.Quantity,
+		UUID:      sub.UUID,
+	}
+
+	return subscription, nil
+}
+
+func parseDonation(s string) (Donation, error) {
+	var dono donation
+	if err := json.Unmarshal([]byte(s), &dono); err != nil {
+		return Donation{}, err
+	}
+
+	donation := Donation{
+		Sender:    dono.User,
+		Timestamp: unixToTime(dono.Timestamp),
+		Message:   dono.Data,
+		Amount:    dono.Amount,
+		UUID:      dono.UUID,
+	}
+
+	return donation, nil
+}
+
 func parseSubOnly(s string) (SubOnly, error) {
 	var so subOnly
 

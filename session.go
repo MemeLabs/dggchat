@@ -204,6 +204,20 @@ func (s *Session) listen() {
 			}
 			s.handlers.pinHandler(pin, s)
 
+		case "SUBSCRIPTION", "GIFTSUB", "MASSGIFT":
+			sub, err := parseSubscription(mContent)
+			if s.handlers.subscriptionHandler == nil || err != nil {
+				continue
+			}
+			s.handlers.subscriptionHandler(sub, s)
+
+		case "DONATION":
+			dono, err := parseDonation(mContent)
+			if s.handlers.donationHandler == nil || err != nil {
+				continue
+			}
+			s.handlers.donationHandler(dono, s)
+
 		case "MUTE":
 			mute, err := parseMute(mContent, s)
 			if s.handlers.muteHandler == nil || err != nil {

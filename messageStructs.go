@@ -145,6 +145,54 @@ type (
 		UUID string `json:"uuid"`
 	}
 
+	// SubTier represents a dgg subscription tier
+	SubTier struct {
+		Tier  int64
+		Label string
+	}
+
+	// Subscription represents a dgg subscription message
+	Subscription struct {
+		Sender    User
+		Recipient User
+		Timestamp time.Time
+		Message   string
+		Tier      SubTier
+		Quantity  int64
+		UUID      string
+	}
+
+	subscription struct {
+		Data      string `json:"data"`
+		Timestamp int64  `json:"timestamp"`
+		Nick      string `json:"nick"`
+		Tier      int64  `json:"tier"`
+		TierLabel string `json:"tierLabel"`
+		Giftee    string `json:"giftee"`
+		Quantity  int64  `json:"quantity"`
+		User      User   `json:"user"`
+		Recipient User   `json:"recipient"`
+		UUID      string `json:"uuid"`
+	}
+
+	// Donation represents a dgg donation message
+	Donation struct {
+		Sender    User
+		Timestamp time.Time
+		Message   string
+		Amount    int64
+		UUID      string
+	}
+
+	donation struct {
+		Data      string `json:"data"`
+		Timestamp int64  `json:"timestamp"`
+		Nick      string `json:"nick"`
+		Amount    int64  `json:"amount"`
+		User      User   `json:"user"`
+		UUID      string `json:"uuid"`
+	}
+
 	// Ping represents a pong response from the server
 	Ping struct {
 		Timestamp int64 `json:"timestamp"`
@@ -181,4 +229,14 @@ func (u *User) HasFeature(s string) bool {
 // IsAction returns true if the message was an action (/me)
 func (m *Message) IsAction() bool {
 	return strings.HasPrefix(m.Message, "/me ")
+}
+
+// IsGift returns true if the subscription was a gift
+func (s *Subscription) IsGift() bool {
+	return s.Sender.Nick != s.Recipient.Nick
+}
+
+// IsMassGift returns true if the subscription was a mass gift
+func (s *Subscription) IsMassGift() bool {
+	return s.Quantity > 0
 }

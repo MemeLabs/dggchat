@@ -1,0 +1,24 @@
+linters:
+  enable:
+    - errcheck
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+    - revive
+  enable-all: false
+  disable-all: true
+  fast: false
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+
+severity:
+  default-severity: error
+  case-sensitive: false
+  rules:
+    - linters:
+        - unused
+      severity: warning

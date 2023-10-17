@@ -145,6 +145,11 @@ type (
 		UUID      string `json:"uuid"`
 	}
 
+	eventUser struct {
+		User
+		CreatedDate string `json:"createdDate"`
+	}
+
 	// SubTier represents a dgg subscription tier
 	SubTier struct {
 		Tier  int64
@@ -163,16 +168,16 @@ type (
 	}
 
 	subscription struct {
-		Data      string `json:"data"`
-		Timestamp int64  `json:"timestamp"`
-		Nick      string `json:"nick"`
-		Tier      int64  `json:"tier"`
-		TierLabel string `json:"tierLabel"`
-		Giftee    string `json:"giftee"`
-		Quantity  int64  `json:"quantity"`
-		User      User   `json:"user"`
-		Recipient User   `json:"recipient"`
-		UUID      string `json:"uuid"`
+		Data      string    `json:"data"`
+		Timestamp int64     `json:"timestamp"`
+		Nick      string    `json:"nick"`
+		Tier      int64     `json:"tier"`
+		TierLabel string    `json:"tierLabel"`
+		Giftee    string    `json:"giftee"`
+		Quantity  int64     `json:"quantity"`
+		User      eventUser `json:"user"`
+		Recipient eventUser `json:"recipient"`
+		UUID      string    `json:"uuid"`
 	}
 
 	// Donation represents a dgg donation message
@@ -185,12 +190,12 @@ type (
 	}
 
 	donation struct {
-		Data      string `json:"data"`
-		Timestamp int64  `json:"timestamp"`
-		Nick      string `json:"nick"`
-		Amount    int64  `json:"amount"`
-		User      User   `json:"user"`
-		UUID      string `json:"uuid"`
+		Data      string    `json:"data"`
+		Timestamp int64     `json:"timestamp"`
+		Nick      string    `json:"nick"`
+		Amount    int64     `json:"amount"`
+		User      eventUser `json:"user"`
+		UUID      string    `json:"uuid"`
 	}
 
 	// Ping represents a pong response from the server

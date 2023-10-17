@@ -195,9 +195,34 @@ func parseSubscription(s string) (Subscription, error) {
 		return Subscription{}, err
 	}
 
-	recipient := sub.Recipient
-	if recipient.Nick == "" {
-		recipient = sub.User
+	userTime, err := time.Parse("2006-01-02T15:04:05-0700", sub.User.CreatedDate)
+	if err != nil {
+		return Subscription{}, err
+	}
+
+	sender := User{
+		ID:          sub.User.ID,
+		Nick:        sub.User.Nick,
+		Features:    sub.User.Features,
+		CreatedDate: userTime,
+		Watching:    sub.User.Watching,
+	}
+
+	recipient := sender
+
+	if sub.Recipient.Nick != "" {
+		recipientTime, err := time.Parse("2006-01-02T15:04:05-0700", sub.Recipient.CreatedDate)
+		if err != nil {
+			return Subscription{}, err
+		}
+
+		recipient = User{
+			ID:          sub.Recipient.ID,
+			Nick:        sub.Recipient.Nick,
+			Features:    sub.Recipient.Features,
+			CreatedDate: recipientTime,
+			Watching:    sub.Recipient.Watching,
+		}
 	}
 
 	tier := SubTier{
@@ -206,7 +231,7 @@ func parseSubscription(s string) (Subscription, error) {
 	}
 
 	subscription := Subscription{
-		Sender:    sub.User,
+		Sender:    sender,
 		Recipient: recipient,
 		Timestamp: unixToTime(sub.Timestamp),
 		Message:   sub.Data,
@@ -224,8 +249,21 @@ func parseDonation(s string) (Donation, error) {
 		return Donation{}, err
 	}
 
+	userTime, err := time.Parse("2006-01-02T15:04:05-0700", dono.User.CreatedDate)
+	if err != nil {
+		return Donation{}, err
+	}
+
+	user := User{
+		ID:          dono.User.ID,
+		Nick:        dono.User.Nick,
+		Features:    dono.User.Features,
+		CreatedDate: userTime,
+		Watching:    dono.User.Watching,
+	}
+
 	donation := Donation{
-		Sender:    dono.User,
+		Sender:    user,
 		Timestamp: unixToTime(dono.Timestamp),
 		Message:   dono.Data,
 		Amount:    dono.Amount,

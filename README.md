@@ -1,4 +1,4 @@
-[![GoDoc](https://godoc.org/github.com/voloshink/dggchat?status.svg)](https://godoc.org/github.com/voloshink/dggchat) [![Go Report Card](https://goreportcard.com/badge/github.com/voloshink/dggchat)](https://goreportcard.com/report/github.com/voloshink/dggchat) [![Build Status](https://travis-ci.org/voloshink/dggchat.svg?branch=master)](https://travis-ci.org/voloshink/dggchat)
+[![GoDoc](https://godoc.org/github.com/MemeLabs/dggchat?status.svg)](https://godoc.org/github.com/MemeLabs/dggchat) [![Go Report Card](https://goreportcard.com/badge/github.com/MemeLabs/dggchat)](https://goreportcard.com/report/github.com/MemeLabs/dggchat)
 
 # dggchat
 [Destinygg](https://www.destiny.gg) chat go bindings. You can acquire a login key [here](https://www.destiny.gg/profile/authentication).
@@ -14,7 +14,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/voloshink/dggchat"
+	"github.com/MemeLabs/dggchat"
 )
 
 func main() {
